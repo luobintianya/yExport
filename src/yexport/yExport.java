@@ -25,9 +25,18 @@ public class yExport {
 		String sql = "SELECT p_code FROM vendors item_t0";
 
 		VirtualConnection vjdbcCon = VexportDbFactory.getDefaultVjdbConnect(serverUrl, useName, password);
-		defaultQuery(vjdbcCon, sql, outPutfile);
+		defaultQuery(vjdbcCon, sql, outPutfile);//执行flexible 或者原生sql
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	static void defaultQuery(final VirtualConnection con, final String sql, final String outFile) {
 		ResultSet rs = null;
 		Statement stmt = null;

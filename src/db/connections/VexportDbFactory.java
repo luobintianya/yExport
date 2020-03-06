@@ -1,84 +1,98 @@
 package db.connections;
 
-import java.io.ObjectOutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.sql.DriverManager;
 import java.util.Properties;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import de.hybris.platform.virtualjdbc.constants.VjdbcConstants.DB;
 import de.simplicit.vjdbc.VirtualConnection;
 
 public class VexportDbFactory {
+	
 
-	public static VirtualConnection getVjdbConnect(String url) {
+	public static VirtualConnection getVjdbConnect(String url, String userName, String password
+			) {
+		trustAllHosts();
 		VirtualConnection vjdbcCon = null;
 		try {
+			url=url+"/virtualjdbc/service?tenant=master";
 			String vjdbcId = "vjdbc";
 			Class.forName(DB.VJDBC_DRIVER_CLASS).newInstance();
-			// String url =
-			// "";
-			vjdbcCon = (VirtualConnection) DriverManager
-					.getConnection("jdbc:hybris:flexiblesearch:" + url + "," + vjdbcId, getUserPrincipals(true));
+//			if (flexibleSearch) {
+				vjdbcCon = (VirtualConnection) DriverManager.getConnection(
+						"jdbc:hybris:flexiblesearch:" + url + "," + vjdbcId, getUserPrincipals(userName, password));
+//			} else {
+//				vjdbcCon = (VirtualConnection) DriverManager.getConnection("jdbc:hybris:sql:" + url + "," + vjdbcId,
+//						getUserPrincipals(userName, password));
+//			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 		return vjdbcCon;
 
 	}
-	public static VirtualConnection getDefaultVjdbConnect() {
-		String url="https://adm.xxx.com/virtualjdbc/service?tenant=master";
-		return getVjdbConnect(url);
+
+	public static VirtualConnection getDefaultVjdbConnect(String url, String userName, String password
+			) {
+
+		return getVjdbConnect(url, userName, password);
 	}
-	static Properties getUserPrincipals(boolean readWrite) {
+
+	static Properties getUserPrincipals(String userName, String passwd) {
 		Properties props = new Properties();
-		if (readWrite) {
-			props.put("vjdbc.login.user", "xxx");
-			props.put("vjdbc.login.password", "Aa123456");
-			//props.put("vjdbc.login.password", "1234");
-		} else {
-			props.put("vjdbc.login.user", "xxxr");
-			props.put("vjdbc.login.password", "Aa123456");
-			//props.put("vjdbc.login.password", "1234");
-		}
+
+		props.put("vjdbc.login.user", userName);
+		props.put("vjdbc.login.password", passwd);
 
 		return props;
 	}
 	
-
-	private static void testConnection(String url) throws Exception {
-		HttpURLConnection conn = null;
-		ObjectOutputStream oos = null;
+	
+	/**
+	 * ∫ˆ¬‘÷§ È¥ÌŒÛ
+	 */
+	private static void trustAllHosts() {
 
 		try {
-			URL _url = new URL(url);
-			conn = (HttpURLConnection) _url.openConnection();
-			conn.setDoOutput(true);
-			conn.setDoInput(true);
-			conn.setRequestMethod("POST");
-			conn.setAllowUserInteraction(false);
-			conn.setUseCaches(false);
-			conn.setRequestProperty("Content-type", "binary/x-java-serialized");
-			conn.setRequestProperty("vjdbc-method", "connect");
-			oos = new ObjectOutputStream(conn.getOutputStream());
-			oos.writeUTF("Some blah ....");
-			oos.flush();
-			conn.connect();
-			System.out.print("----CONNECT---");
-		} finally {
-			if (oos != null) {
-				try {
-					oos.close();
-				} catch (Exception var10) {
-					System.out.println(var10.getMessage());
+
+			TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+					return null;
 				}
 
-				if (conn != null) {
-					conn.disconnect();
+				public void checkClientTrusted(X509Certificate[] certs, String authType) {
 				}
-			}
 
+				public void checkServerTrusted(X509Certificate[] certs, String authType) {
+				}
+			} };
+
+			SSLContext sc = SSLContext.getInstance("SSL");
+			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+			// Create all-trusting host name verifier
+			HostnameVerifier allHostsValid = new HostnameVerifier() {
+				public boolean verify(String hostname, SSLSession session) {
+					return true;
+				}
+			};
+
+			HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (KeyManagementException e) {
+			e.printStackTrace();
 		}
 
-	}
+	};
 }

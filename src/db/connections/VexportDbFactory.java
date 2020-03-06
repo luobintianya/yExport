@@ -17,23 +17,22 @@ import de.hybris.platform.virtualjdbc.constants.VjdbcConstants.DB;
 import de.simplicit.vjdbc.VirtualConnection;
 
 public class VexportDbFactory {
-	
 
-	public static VirtualConnection getVjdbConnect(String url, String userName, String password
-			) {
+	public static VirtualConnection getVjdbConnect(String url, String userName, String password) {
 		trustAllHosts();
 		VirtualConnection vjdbcCon = null;
 		try {
-			url=url+"/virtualjdbc/service?tenant=master";
+			url = url + "/virtualjdbc/service?tenant=master";
 			String vjdbcId = "vjdbc";
 			Class.forName(DB.VJDBC_DRIVER_CLASS).newInstance();
-//			if (flexibleSearch) {
-				vjdbcCon = (VirtualConnection) DriverManager.getConnection(
-						"jdbc:hybris:flexiblesearch:" + url + "," + vjdbcId, getUserPrincipals(userName, password));
-//			} else {
-//				vjdbcCon = (VirtualConnection) DriverManager.getConnection("jdbc:hybris:sql:" + url + "," + vjdbcId,
-//						getUserPrincipals(userName, password));
-//			}
+			// if (flexibleSearch) {
+			vjdbcCon = (VirtualConnection) DriverManager.getConnection(
+					"jdbc:hybris:flexiblesearch:" + url + "," + vjdbcId, getUserPrincipals(userName, password));
+			// } else {
+			// vjdbcCon = (VirtualConnection) DriverManager.getConnection("jdbc:hybris:sql:"
+			// + url + "," + vjdbcId,
+			// getUserPrincipals(userName, password));
+			// }
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -41,8 +40,7 @@ public class VexportDbFactory {
 
 	}
 
-	public static VirtualConnection getDefaultVjdbConnect(String url, String userName, String password
-			) {
+	public static VirtualConnection getDefaultVjdbConnect(String url, String userName, String password) {
 
 		return getVjdbConnect(url, userName, password);
 	}
@@ -55,8 +53,7 @@ public class VexportDbFactory {
 
 		return props;
 	}
-	
-	
+
 	/**
 	 * ∫ˆ¬‘÷§ È¥ÌŒÛ
 	 */
